@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Basketball IQ Academy</title>
+<style>
+body{margin:0;background:#f5f5f5;font-family:Arial,sans-serif;color:#171717}
+#app{max-width:900px;margin:20px auto;padding:16px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:30px}.sub{color:#666;margin-top:5px}
+.stats{display:flex;gap:8px}.stat{background:white;border:1px solid #ddd;border-radius:12px;padding:8px 14px;text-align:center}.stat b{display:block;font-size:21px}.stat span{font-size:10px;color:#666;font-weight:bold}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}.tabs button,button{padding:12px;border:1px solid #ddd;border-radius:10px;background:white;font-weight:bold;cursor:pointer}.tabs .active,.primary{background:#6d28d9;color:white;border-color:#6d28d9}
+.panel{background:white;border:1px solid #ddd;border-radius:18px;padding:18px}.scenario{background:#fafafa;border-radius:14px;padding:18px}.scenario h2{margin-top:0}.choice{display:block;width:100%;text-align:left;margin:9px 0}.feedback{display:none;margin-top:12px;padding:12px;background:#f0f0f0;border-radius:10px;line-height:1.45}
+.hidden{display:none}.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.progress{height:10px;background:#eee;border-radius:99px;overflow:hidden}.progress div{height:100%;width:0;background:#6d28d9}
+.tip{margin-top:15px;padding:12px;background:#f7f0ff;border-left:4px solid #6d28d9}
+input{padding:12px;border:1px solid #ddd;border-radius:9px;font-size:16px;width:150px}
+@media(max-width:600px){.tabs{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="header">
+<div><h1>🏀 BASKETBALL IQ ACADEMY</h1><div class="sub">Play. Learn. Make smarter basketball decisions.</div></div>
+<div class="stats"><div class="stat"><b id="xp">0</b><span>IQ XP</span></div><div class="stat"><b id="streak">0</b><span>STREAK</span></div><div class="stat"><b id="level">1</b><span>LEVEL</span></div></div>
+</div>
+
+<div class="tabs">
+<button class="active" onclick="show('iq',this)">🧠 Basketball IQ</button>
+<button onclick="show('math',this)">➗ Math</button>
+<button onclick="show('rules',this)">📖 Rules</button>
+<button onclick="show('coach',this)">🏆 Coach Mode</button>
+</div>
+
+<div class="panel">
+<section id="iq">
+<div class="scenario"><h2 id="qtitle"></h2><p id="question"></p><div id="choices"></div><div id="feedback" class="feedback"></div><div class="actions"><button class="primary" onclick="nextIQ()">NEXT PLAY →</button></div></div>
+<div class="tip">💡 <b>Coach tip:</b> The best basketball decision is often the one that creates the highest-quality shot for your team.</div>
+</section>
+
+<section id="math" class="hidden">
+<div class="scenario"><h2>➗ Basketball Math Lab</h2><p id="mathq"></p><input id="answer" type="number" placeholder="Your answer"><div class="actions"><button class="primary" onclick="checkMath()">CHECK ANSWER</button><button onclick="newMath()">NEW PROBLEM</button></div><p id="mathresult"></p></div>
+</section>
+
+<section id="rules" class="hidden">
+<div class="scenario"><h2>📖 Know the Game</h2><p id="ruleq"></p><div id="rulechoices"></div><div id="rulefeedback" class="feedback"></div><div class="actions"><button class="primary" onclick="nextRule()">NEXT RULE →</button></div></div>
+</section>
+
+<section id="coach" class="hidden">
+<div class="scenario"><h2>🏆 Coach Mode</h2><p>Choose a basketball concept and learn why it matters.</p>
+<button class="choice" onclick="coach('🎯 Shot Selection: choose high-percentage shots when possible.')">🎯 Shot Selection</button>
+<button class="choice" onclick="coach('📐 Spacing: keep teammates separated so defenders cannot easily guard multiple players.')">📐 Spacing</button>
+<button class="choice" onclick="coach('⏱️ Clock Management: understand when to attack and when to slow down.')">⏱️ Clock Management</button>
+<div id="coachfeedback" class="feedback"></div></div>
+</section>
+</div>
+</div>
+
+<script>
+let xp=0,streak=0,level=1,qi=0,ri=0,mi=0;
+const questions=[
+{t:"READ THE DEFENSE",q:"You have the ball with 8 seconds left. A defender is playing tight while your teammate is wide open in the corner. What is the smartest decision?",c:["Force a contested 3-pointer","Pass to the open teammate","Dribble backward until time expires","Throw the ball away"],a:1,e:"Passing to the open teammate creates a higher-quality shot and punishes the defender for overcommitting."},
+{t:"FAST BREAK IQ",q:"Your team has a 3-on-1 fast break. The defender is guarding you and the middle. What should you look for?",c:["A pass to the open teammate","A backwards pass","A 30-foot shot immediately","Stop the fast break"],a:0,e:"Make the defense choose. If your teammate becomes open, deliver the pass."},
+{t:"DEFENSIVE IQ",q:"Your teammate gets beaten off the dribble. What is the best help-defense response?",c:["Watch the play","Help briefly while protecting your assignment","Leave the court","Foul immediately"],a:1,e:"Good defense is connected. Help the teammate, then recover when possible."},
+{t:"SHOT SELECTION",q:"You are 2-for-2 from close range but 0-for-4 from deep. What should you consider?",c:["Only shoot 3s","Attack the area where you are creating better shots","Stop playing","Take the hardest shot possible"],a:1,e:"Recognize what the defense gives you and what shots are working."}
+];
+const rules=[
+{q:"A defender makes illegal contact with a shooter while the shooter is attempting a shot. What is the most likely call?",c:["Travel","Shooting foul","Backcourt violation","Jump ball"],a:1,e:"Illegal defensive contact during a shot can result in a shooting foul."},
+{q:"A player takes too many steps without legally dribbling. What violation is this?",c:["Traveling","Goaltending","Double dribble","Three seconds"],a:0,e:"Traveling occurs when a player moves illegally without maintaining a legal dribble."},
+{q:"A player stops dribbling, then starts dribbling again. What is this generally called?",c:["Traveling","Double dribble","Charge","Carry"],a:1,e:"After ending a dribble, a player generally cannot start another dribble unless another player touches the ball."},
+{q:"An offensive player pushes a defender who has established legal position. What can be called?",c:["Charging/offensive foul","Free throw violation","Goaltending","Jump ball"],a:0,e:"Illegal offensive contact can result in an offensive foul such as charging."}
+];
+function update(){document.getElementById("xp").textContent=xp;document.getElementById("streak").textContent=streak;document.getElementById("level").textContent=1+Math.floor(xp/100)}
+function award(n){xp+=n;streak++;update()} function miss(){streak=0;update()}
+function renderIQ(){let z=questions[qi%questions.length];qtitle.textContent=z.t;question.textContent=z.q;feedback.style.display="none";choices.innerHTML="";z.c.forEach((v,i)=>{let b=document.createElement("button");b.className="choice";b.textContent=v;b.onclick=()=>{if(b.disabled)return;document.querySelectorAll("#choices button").forEach(x=>x.disabled=true);if(i===z.a){award(20);feedback.innerHTML="✅ <b>Correct!</b> "+z.e}else{miss();feedback.innerHTML="❌ <b>Not quite.</b> "+z.e}feedback.style.display="block"};choices.appendChild(b)})}
+function nextIQ(){qi++;renderIQ()}
+function renderRule(){let z=rules[ri%rules.length];ruleq.textContent=z.q;rulefeedback.style.display="none";rulechoices.innerHTML="";z.c.forEach((v,i)=>{let b=document.createElement("button");b.className="choice";b.textContent=v;b.onclick=()=>{if(b.disabled)return;document.querySelectorAll("#rulechoices button").forEach(x=>x.disabled=true);if(i===z.a){award(15);rulefeedback.innerHTML="✅ <b>Correct!</b> "+z.e}else{miss();rulefeedback.innerHTML="❌ <b>Try again.</b> "+z.e}rulefeedback.style.display="block"};rulechoices.appendChild(b)})}
+function nextRule(){ri++;renderRule()}
+function newMath(){let p=[[12,4],[21,3],[30,5],[18,6],[24,4],[35,5]][mi++%6];mathq.textContent=p[0]+" points in "+p[1]+" minutes. What is the scoring rate per minute?";mathq.dataset.answer=p[0]/p[1];answer.value="";mathresult.textContent=""}
+function checkMath(){let a=Number(answer.value),c=Number(mathq.dataset.answer);if(a===c){award(15);mathresult.textContent="✅ Correct! "+c+" point(s) per minute."}else{miss();mathresult.textContent="❌ Not quite. The answer is "+c+" point(s) per minute."}}
+function coach(s){award(10);coachfeedback.textContent="🧠 Coach note: "+s+" This is a key part of making smart team decisions.";coachfeedback.style.display="block"}
+function show(id,btn){document.querySelectorAll("#app section").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active")}
+renderIQ();renderRule();newMath();update();
+</script>
+</body>
+</html>
